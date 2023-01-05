@@ -3,16 +3,23 @@ package com.luv2code.component;
 import com.luv2code.component.models.CollegeStudent;
 import com.luv2code.component.models.StudentGrades;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class ApplicationExampleTest {
     private static int count;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Value(value = "${info.school.name}")
     private String schoolName;
@@ -45,10 +52,50 @@ class ApplicationExampleTest {
     }
 
     @Test
-    void basicTest() {
+    @DisplayName("Add Grade Results for student grades")
+    void addGradeResultsForStudentGrades() {
+        double expected = 210.3;
+        assertEquals(expected,
+                studentGrades.addGradeResultsForSingleClass(collegeStudent.getStudentGrades().getMathGradeResults()));
     }
 
     @Test
-    void basicTest2() {
+    @DisplayName("Is grade grater")
+    void isGradeGreaterStudentGrades() {
+        assertTrue(studentGrades.isGradeGreater(90, 70), "Should be true");
+    }
+
+    @Test
+    @DisplayName("Check null for student grades")
+    void testCheckNullForStudentGrades() {
+        assertNotNull(studentGrades.checkNull(collegeStudent.getStudentGrades().getMathGradeResults()));
+    }
+
+    @Test
+    @DisplayName("Student without grades")
+    void checkStudentWithoutGrades() {
+        assertNull(applicationContext.getBean("collegeStudent", CollegeStudent.class).getStudentGrades());
+    }
+
+    @Test
+    @DisplayName("Student is prototype")
+    void testCollegeStudentScopeIsPrototype() {
+        CollegeStudent instance2 = applicationContext.getBean("collegeStudent", CollegeStudent.class);
+        assertNotSame(collegeStudent, instance2);
+    }
+
+    @Test
+    @DisplayName("Grade Average")
+    void testGradeAverage() {
+        double sumExpected = 210.3;
+        double avgExpected = 70.1;
+        assertAll("Testing all asserts",
+                () -> assertEquals(
+                        sumExpected,
+                        studentGrades.addGradeResultsForSingleClass(collegeStudent.getStudentGrades().getMathGradeResults())),
+                () -> assertEquals(
+                        avgExpected,
+                        studentGrades.findGradePointAverage(collegeStudent.getStudentGrades().getMathGradeResults())
+                ));
     }
 }
